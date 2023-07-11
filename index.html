@@ -16,23 +16,29 @@
         const height = 800 - margin.top - margin.bottom;
         let svg = d3.select("#linegraph");
         
+        // Load the data
         d3.csv("2019.csv").then((data) => {
+            // Keep only top 10
             data = data.slice(0, 10);
             console.log(data);
 
+            // Set up x-scale
             let x = d3.scaleBand()
                 .domain(data.map((d) => d.Country))
                 .range([margin.left, 600 - margin.right])
                 .padding(0.1); 
 
+            // Set up y-scale
             let y = d3.scaleLinear()
                 .domain([Math.floor(d3.min(data, (d) => d.Score)), Math.ceil(d3.max(data, (d) => d.Score))])
                 .range([500 - margin.bottom, margin.top]);
 
+            // Colorize!
             let color = d3.scaleOrdinal()
                 .domain(data.map(d => d.Country))
                 .range(['#4682B4', '#FFA500', '#228B22', '#B22222', '#8A2BE2', '#A52A2A', '#EE82EE', '#708090', '#9ACD32', '#40E0D0']);
 
+            // Draw the bars
             svg.selectAll("rect")
                 .data(data)
                 .enter().append("rect")
@@ -42,10 +48,12 @@
                 .attr("width", x.bandwidth())
                 .attr('fill', d => color(d.Country));
 
+            // Add bottom axis (country name)
             svg.append("g")
                 .attr("transform", `translate(0,${500 - margin.bottom})`)
                 .call(d3.axisBottom(x));
 
+            // Add left axis (happiness score)
             svg.append("g")
                 .attr("transform", `translate(${margin.left},0)`)
                 .call(d3.axisLeft(y));
