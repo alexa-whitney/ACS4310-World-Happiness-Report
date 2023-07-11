@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Happiness Report</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1 style="color: black">World Happiness Report</h1>
+    <h4 style="color: black">ACS 4310 Final Assessment - Alexa Whitney</h4>
+    <svg id="linegraph" width="800" height="800"></svg>
+    <script>
+        let margin = { top: 20, right: 20, bottom: 40, left: 40 };
+        const width = 800 - margin.left - margin.right;
+        const height = 800 - margin.top - margin.bottom;
+        let svg = d3.select("#linegraph");
+        
+        d3.csv("2019.csv").then((data) => {
+            data = data.slice(0, 10);
+            console.log(data);
+
+            let x = d3.scaleBand()
+                .domain(data.map((d) => d.Country))
+                .range([margin.left, 600 - margin.right])
+                .padding(0.1); 
+
+            let y = d3.scaleLinear()
+                .domain([Math.floor(d3.min(data, (d) => d.Score)), Math.ceil(d3.max(data, (d) => d.Score))])
+                .range([500 - margin.bottom, margin.top]);
+
+            let color = d3.scaleOrdinal()
+                .domain(data.map(d => d.Country))
+                .range(['#4682B4', '#FFA500', '#228B22', '#B22222', '#8A2BE2', '#A52A2A', '#EE82EE', '#708090', '#9ACD32', '#40E0D0']);
+
+            svg.selectAll("rect")
+                .data(data)
+                .enter().append("rect")
+                .attr("x", (d) => x(d.Country))
+                .attr("y", (d) => y(d.Score))
+                .attr("height", (d) => 500 - margin.bottom - y(d.Score))
+                .attr("width", x.bandwidth())
+                .attr('fill', d => color(d.Country));
+
+            svg.append("g")
+                .attr("transform", `translate(0,${500 - margin.bottom})`)
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y));
+        });
+    </script>
+</body>
+</html>
+
+
